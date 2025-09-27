@@ -37,10 +37,25 @@ const RoomSchema = new mongoose.Schema({
 
 RoomSchema.methods.beatPawns = function (position, attackingPawnColor) {
     const pawnsOnPosition = this.pawns.filter(pawn => pawn.position === position);
+    const attackingPawn = pawnsOnPosition.find(pawn => pawn.color === attackingPawnColor);
+    
+    if (!attackingPawn) return false;
+    
+    const attackerIndex = this.getPawnIndex(attackingPawn._id);
+    
     pawnsOnPosition.forEach(pawn => {
         if (pawn.color !== attackingPawnColor) {
-            const index = this.getPawnIndex(pawn._id);
-            this.pawns[index].position = this.pawns[index].basePos;
+            const victimIndex = this.getPawnIndex(pawn._id);
+
+            this.pawns[attackerIndex].pawnScore += this.pawns[victimIndex].pawnScore;
+            
+            this.pawns[victimIndex].position = this.pawns[victimIndex].basePos;
+            this.pawns[victimIndex].pawnScore = 0;
+            
+            const attackingPlayer = this.players.find(p => p.color === attackingPawnColor);
+            if (attackingPlayer) {
+                attackingPlayer.captures += 1;
+            }
         }
     });
 };
@@ -49,6 +64,7 @@ RoomSchema.methods.changeMovingPlayer = function () {
     if (this.winner) return;
     const playerIndex = this.players.findIndex(player => player.nowMoving === true);
     this.players[playerIndex].nowMoving = false;
+    this.updateAllPlayersScores();
     if (playerIndex + 1 === this.players.length) {
         this.players[0].nowMoving = true;
     } else {
@@ -58,6 +74,10 @@ RoomSchema.methods.changeMovingPlayer = function () {
     this.rolledNumber = null;
     timeoutManager.clear(this._id.toString());
     timeoutManager.set(makeRandomMove, MOVE_TIME, this._id.toString());
+};
+
+RoomSchema.methods.updateAllPlayersScores = function () {
+    this.players.forEach(player => player.updateTotalScore(this));
 };
 
 RoomSchema.methods.movePawn = function (pawn) {
@@ -74,6 +94,11 @@ RoomSchema.methods.getPawnsThatCanMove = function () {
 
 RoomSchema.methods.changePositionOfPawn = function (pawn, newPosition) {
     const pawnIndex = this.getPawnIndex(pawn._id);
+
+    if (newPosition !== pawn.position && ![16, 29, 42, 55].includes(newPosition)) {
+        this.pawns[pawnIndex].pawnScore += this.rolledNumber;
+    }
+    
     this.pawns[pawnIndex].position = newPosition;
 };
 

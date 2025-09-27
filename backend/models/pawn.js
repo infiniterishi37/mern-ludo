@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 const PawnSchema = new Schema({
     color: String,
     basePos: Number,
+    pawnScore: { type: Number, default: 0 },
     position: Number,
 });
 
