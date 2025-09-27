@@ -6,6 +6,33 @@ Ludo Online is a multiplayer web-based implementation of the classic board game 
 >> <a href="https://youtu.be/mGMnH9Nvsyw">Watch YouTube Video here</a> <<
   </p>
 
+## Recent Updates
+
+### Latest Enhancements (Latest 4 commits)
+
+**🎨 UI/UX Improvements (Latest)**
+- Enhanced visibility and styling of game features for better user experience
+- Improved visual presentation using modern UI design principles
+- Refined component styling and layout optimization
+
+**🏆 Winner Feature Implementation** 
+- Added comprehensive winner detection system based on scoring mechanics
+- Implemented timer-based game completion functionality  
+- Enhanced game termination logic with proper winner announcement
+- Added game timing controls with start/end time tracking
+
+**📡 Real-time Score Updates**
+- Integrated live scoreboard with WebSocket/SocketIO communication
+- Added dynamic frontend components for real-time score display
+- Implemented responsive scoreboard UI with modern CSS styling
+- Enhanced user experience with instant score updates during gameplay
+
+**⚙️ Advanced Scoring System**
+- Developed new backend scoring rules and game mechanics
+- Enhanced pawn movement scoring with position-based calculations
+- Improved player score tracking and capture mechanics
+- Added comprehensive score update methods for all game scenarios
+
 ## Architecture
 
 ![Interface](https://github.com/Wenszel/mern-ludo/blob/main/src/images/architecture.png?raw=true)
