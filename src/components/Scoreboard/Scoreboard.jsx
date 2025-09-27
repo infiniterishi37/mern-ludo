@@ -1,7 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './Scoreboard.module.css';
 
-const Scoreboard = ({ players, currentPlayer}) => {
+const Scoreboard = ({ players, currentPlayer, gameStartTime, gameEndTime, started }) => {
+    const [remainingTime, setRemainingTime] = useState(0);
+
+    useEffect(() => {
+        if (!started || !gameEndTime) return;
+
+        const updateTimer = () => {
+            const now = Date.now();
+            const remaining = Math.max(0, gameEndTime - now);
+            setRemainingTime(remaining);
+        };
+
+        updateTimer();
+        const interval = setInterval(updateTimer, 1000);
+
+        return () => clearInterval(interval);
+    }, [gameEndTime, started]);
+
     if (!players) return null;
 
     const activePlayers = players.filter(player => player.name && player.name !== '...');
@@ -15,10 +32,27 @@ const Scoreboard = ({ players, currentPlayer}) => {
         return (b.captures || 0) - (a.captures || 0);
     });
 
+    const formatTime = (ms) => {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    const isWarning = remainingTime <= 60000 && remainingTime > 0;
+
     return (
         <div className={styles.scoreboard}>
+            {started && gameEndTime && (
+                <div className={`${styles.timer} ${isWarning ? styles.timerWarning : ''}`}>
+                    <div className={styles.timerLabel}>⏰ Time Left</div>
+                    <div className={styles.timerValue}>
+                        {remainingTime > 0 ? formatTime(remainingTime) : '0:00'}
+                    </div>
+                </div>
+            )}
+            
             <h3 className={styles.title}>Live Scores</h3>
-            {/* <h4 className={styles.timer}>{timer} : {Math.floor(timer / 3600000)} : {Math.floor(timer / 60000) % 60} : {Math.floor(timer / 1000) % 60}</h4> */}
+            
             {sortedPlayers.length === 0 ? (
                 <div className={styles.empty}>No players yet</div>
             ) : (

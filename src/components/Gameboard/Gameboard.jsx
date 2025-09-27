@@ -19,6 +19,8 @@ const Gameboard = () => {
     const [isReady, setIsReady] = useState();
     const [nowMoving, setNowMoving] = useState(false);
     const [started, setStarted] = useState(false);
+    const [gameStartTime, setGameStartTime] = useState(null);
+    const [gameEndTime, setGameEndTime] = useState(null);
 
     const [movingPlayer, setMovingPlayer] = useState('red');
 
@@ -49,8 +51,9 @@ const Gameboard = () => {
             setPlayers(data.players);
             setPawns(data.pawns);
             setTime(data.nextMoveTime);
-            setTimer(data.timer);
             setStarted(data.started);
+            setGameStartTime(data.gameStartTime);
+            setGameEndTime(data.gameEndTime);
         });
 
         socket.on('game:winner', winner => {
@@ -78,7 +81,7 @@ const Gameboard = () => {
                     />
                     <Map pawns={pawns} nowMoving={nowMoving} rolledNumber={rolledNumber} />
 
-                    {started && <Scoreboard players={players}  currentPlayer={movingPlayer}/>}
+                    {started && <Scoreboard players={players}  currentPlayer={movingPlayer} gameStartTime={gameStartTime} gameEndTime={gameEndTime} started={started}/>}
                 </div>
             ) : (
                 <ReactLoading type='spinningBubbles' color='white' height={667} width={375} />
