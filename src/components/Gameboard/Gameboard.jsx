@@ -6,6 +6,7 @@ import Map from './Map/Map';
 import Navbar from '../Navbar/Navbar';
 import Overlay from '../Overlay/Overlay';
 import styles from './Gameboard.module.css';
+import Scoreboard from '../Scoreboard/Scoreboard';
 import trophyImage from '../../images/trophy.webp';
 
 const Gameboard = () => {
@@ -13,7 +14,6 @@ const Gameboard = () => {
     const context = useContext(PlayerDataContext);
     const [pawns, setPawns] = useState([]);
     const [players, setPlayers] = useState([]);
-
     const [rolledNumber, setRolledNumber] = useSocketData('game:roll');
     const [time, setTime] = useState();
     const [isReady, setIsReady] = useState();
@@ -49,6 +49,7 @@ const Gameboard = () => {
             setPlayers(data.players);
             setPawns(data.pawns);
             setTime(data.nextMoveTime);
+            setTimer(data.timer);
             setStarted(data.started);
         });
 
@@ -76,6 +77,8 @@ const Gameboard = () => {
                         ended={winner !== null}
                     />
                     <Map pawns={pawns} nowMoving={nowMoving} rolledNumber={rolledNumber} />
+
+                    {started && <Scoreboard players={players}  currentPlayer={movingPlayer}/>}
                 </div>
             ) : (
                 <ReactLoading type='spinningBubbles' color='white' height={667} width={375} />
