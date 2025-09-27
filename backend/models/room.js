@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { COLORS, MOVE_TIME } = require('../utils/constants');
+const { COLORS, MOVE_TIME, GAME_TIMER, TIMER_UPDATE_INTERVAL } = require('../utils/constants');
 const { makeRandomMove } = require('../handlers/handlersFunctions');
 const timeoutManager = require('./timeoutManager.js');
 const PawnSchema = require('./pawn');
@@ -16,6 +16,8 @@ const RoomSchema = new mongoose.Schema({
     rolledNumber: Number,
     players: [PlayerSchema],
     winner: { type: String, default: null },
+    gameStartTime: {type: Number, default: null},
+    gameEndTime: {type: Number, default: null},
     pawns: {
         type: [PawnSchema],
         default: () => {
@@ -102,20 +104,56 @@ RoomSchema.methods.changePositionOfPawn = function (pawn, newPosition) {
     this.pawns[pawnIndex].position = newPosition;
 };
 
+RoomSchema.methods.findWinnerByScore = function() {
+    this.updateAllPlayersScores();
+    let winner = this.players[0];
+    let highestScore = winner.playerScore || 0;
+
+    for (let i = 1; i < this.players.length; i++) {
+        const playerScore = this.players[i].playerScore || 0;
+        if (playerScore > highestScore) {
+            highestScore = playerScore;
+            winner = this.players[i];
+        } else if (playerScore === highestScore) {
+            if ((this.players[i].captures || 0) > (winner.captures || 0)) {
+                winner = this.players[i];
+            }
+        }
+    }
+    
+    return winner.color;
+};
+
+RoomSchema.methods.endGameByTimer = function() {
+    if (this.winner) return;
+    const winnerColor = this.findWinnerByScore();
+    this.endGame(winnerColor);
+
+    const { sendWinner } = require('../socket/emits');
+    sendWinner(this._id.toString(), winnerColor);
+};
+
 RoomSchema.methods.canStartGame = function () {
     return this.players.filter(player => player.ready).length >= 2;
 };
 
 RoomSchema.methods.startGame = function () {
     this.started = true;
+    this.gameStartTime = Date.now();
+    this.gameEndTime = this.gameStartTime + GAME_TIMER;
     this.nextMoveTime = Date.now() + MOVE_TIME;
     this.players.forEach(player => (player.ready = true));
     this.players[0].nowMoving = true;
+    timeoutManager.set(() => {
+        this.endGameByTimer();
+        this.save();
+    }, GAME_TIMER, this._id.toString() + '_game_timer');
     timeoutManager.set(makeRandomMove, MOVE_TIME, this._id.toString());
 };
 
 RoomSchema.methods.endGame = function (winner) {
     timeoutManager.clear(this._id.toString());
+    timeoutManager.clear(this._id.toString() + '_game_timer');
     this.rolledNumber = null;
     this.nextMoveTime = null;
     this.players.map(player => (player.nowMoving = false));
