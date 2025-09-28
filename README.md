@@ -57,30 +57,6 @@ This project extends a traditional pawn-based board game with **timer rules, sco
 
 ## 📺 Demo
 
-🎥 Watch the demo on YouTube: [Demo Link Here](#)
+🎥 Watch the demo on YouTube: [Demo Link Here](https://youtu.be/V_15dLr-dzs)
 
 ---
-
-## 🚀 Tech Stack
-
-- **Backend**: Node.js, Socket.IO
-- **Frontend**: React.js
-- **Database/Models**: Player & Pawn models with scoring logic
-
----
-
-## 📌 Features Summary
-
-- ✅ Timer-based game end conditions
-- ✅ Pawn score & capture-based scoring
-- ✅ Real-time winner declaration with sockets
-- ✅ Clean frontend scoreboard with live timer
-
----
-
-## 🔧 Want the actual code files?
-If you'd like, I can add runnable starter code to this canvas (Node backend and React frontend files):
-- `server/` (Node + Socket.IO) with model examples and timer logic
-- `client/` (React) with `GameBoard` and `Scoreboard` components and timer UI
-
-Tell me which files you want added and I will create them directly in the canvas.
